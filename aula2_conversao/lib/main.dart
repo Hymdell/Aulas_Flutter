@@ -12,8 +12,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        home: const Home(),
-        theme: ThemeData(hintColor: Colors.green, primaryColor: Colors.white));
+      debugShowCheckedModeBanner: false,
+      home: const Home(),
+      theme: ThemeData(hintColor: Colors.green, primaryColor: Colors.white),
+    );
   }
 }
 
@@ -64,80 +66,90 @@ class _HomeState extends State<Home> {
       return;
     }
     double dolar = double.parse(text);
-    dolarController.text = (dolar * this.dolar).toStringAsFixed(2);
+    realController.text = (dolar * this.dolar).toStringAsFixed(2);
     euroController.text = (dolar * this.dolar / euro).toStringAsFixed(2);
   }
 
-  void _euroChanged(String text) {
+  void _eurorChanged(String text) {
     if (text.isEmpty) {
       _clearAll();
       return;
     }
     double euro = double.parse(text);
-    dolarController.text = (euro * this.euro).toStringAsFixed(2);
-    euroController.text = (euro * this.euro / dolar).toStringAsFixed(2);
+    realController.text = (euro * this.euro).toStringAsFixed(2);
+    dolarController.text = (euro * this.euro / dolar).toStringAsFixed(2);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.black,
-        appBar: AppBar(
-          title: const Text('Conversor de moeda'),
-          backgroundColor: Colors.green,
-          centerTitle: true,
-        ),
-        body: FutureBuilder<Map>(
-            future: getData(),
-            builder: (context, snapshot) {
-              switch (snapshot.connectionState) {
-                case ConnectionState.none:
-                case ConnectionState.waiting:
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: const Text('Conversor de Moeda'),
+        backgroundColor: Colors.green,
+        centerTitle: true,
+      ),
+      body: FutureBuilder<Map>(
+          future: getData(),
+          builder: (context, snapshot) {
+            switch (snapshot.connectionState) {
+              case ConnectionState.none:
+              case ConnectionState.waiting:
+                return const Center(
+                  child: Text(
+                    'Aguarde . . .',
+                    style: TextStyle(color: Colors.green, fontSize: 25.0),
+                  ),
+                );
+              default:
+                if (snapshot.hasError) {
                   return const Center(
                     child: Text(
-                      'Aguarde . . .',
-                      style: TextStyle(color: Colors.green, fontSize: 30.0),
+                      'ERRO',
+                      style: TextStyle(color: Colors.green, fontSize: 25.0),
                       textAlign: TextAlign.center,
                     ),
                   );
-                default:
-                  if (snapshot.hasError) {
-                    return const Center(
-                        child: Text(
-                      'Ops, houve uma falha ao buscar os dados',
-                      style: TextStyle(color: Colors.green, fontSize: 25.0),
-                      textAlign: TextAlign.center,
-                    ));
-                  } else {
-                    dolar =
-                        snapshot.data!['results']['currencies']['USD']['buy'];
-                    euro =
-                        snapshot.data!['results']['currencies']['EUR']['buy'];
+                } else {
+                  dolar = snapshot.data!['results']['currencies']['USD']['buy'];
+                  euro = snapshot.data!['results']['currencies']['EUR']['buy'];
 
-                    return SingleChildScrollView(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: <Widget>[
-                            const Icon(
-                              Icons.attach_money,
-                              size: 100,
-                              color: Colors.green,
-                            ),
-                            buildTextField(
-                                'Reais', 'R\$ ', realController, _realChanged),
-                            const Divider(),
-                            buildTextField(
-                                'Euros', '€ ', euroController, _euroChanged),
-                            const Divider(),
-                            buildTextField('Dólares', 'US\$ ', dolarController,
-                                _dolarChanged),
-                            const Divider(),
-                          ],
-                        ));
-                  }
-              }
-            }));
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          const Icon(
+                            Icons.attach_money,
+                            size: 100.0,
+                            color: Colors.green,
+                          ),
+                          buildTextField(
+                            'Reais',
+                            'R\$',
+                            realController,
+                            _realChanged,
+                          ),
+                          const Divider(),
+                          buildTextField(
+                            'Euro',
+                            '€',
+                            euroController,
+                            _eurorChanged,
+                          ),
+                          const Divider(),
+                          buildTextField(
+                            'Dólares',
+                            'US',
+                            dolarController,
+                            _dolarChanged,
+                          )
+                        ]),
+                  );
+                }
+            }
+          }),
+    );
   }
 }
 
@@ -150,8 +162,8 @@ Widget buildTextField(
         labelStyle: const TextStyle(color: Colors.green),
         border: const OutlineInputBorder(),
         prefixText: prefix),
-    style: const TextStyle(color: Colors.green, fontSize: 25.0),
+    style: TextStyle(color: Colors.green, fontSize: 25.0),
     onChanged: f,
-    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+    keyboardType: TextInputType.numberWithOptions(decimal: true),
   );
 }
